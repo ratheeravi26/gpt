@@ -5,11 +5,12 @@ import json
 HOST = "your-splunk-azure-cluster-url"
 PORT = 8089
 TOKEN = "your-splunk-token"
-CERTIFICATE_FILE = "path/to/your/certificate/file"
 
 # Create an HTTP client object and set the authentication headers
-http = httplib2.Http()
-http.add_certificate(keyfile=None, certfile=CERTIFICATE_FILE, password=None)
+http = httplib2.Http(disable_ssl_certificate_validation=True)
+http.disable_ssl_certificate_validation = True
+http.ca_certs = None
+http.follow_all_redirects = True
 headers = {
     "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json"
