@@ -1,0 +1,31 @@
+import requests
+import json
+
+# Set up the variables for the Splunk API
+splunk_url = "https://your-splunk-instance.com:8089"
+auth_token = "your-auth-token"
+
+# Set up the Splunk API endpoint to fetch the indexes
+endpoint = "/servicesNS/-/-/data/indexes"
+
+# Set up the headers for the request
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + auth_token
+}
+
+# Send the request to Splunk API and retrieve the response
+response = requests.get(splunk_url + endpoint, headers=headers, verify=False)
+
+# Convert the response to JSON format
+response_json = json.loads(response.text)
+
+# Extract the index names from the JSON response
+indexes = []
+for index in response_json["entry"]:
+    indexes.append(index["name"])
+
+# Print the list of indexes available to the user
+print("Indexes available to user:")
+for index in indexes:
+    print(index)
