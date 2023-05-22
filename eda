@@ -1,0 +1,32 @@
+In the session, you can highlight the following EDA techniques for identifying processes that are slowing down the Azure workspace compared to on-premise:
+
+1. Summary Statistics:
+   - Compute and present descriptive statistics such as mean, median, standard deviation, minimum, maximum, and quartiles for relevant variables.
+   - Identify key statistics that can provide insights into the performance differences between Azure workspace and on-premise.
+
+2. Data Visualization:
+   - Utilize various plots and charts to visually explore the data.
+   - Histograms can help identify the distribution of variables and identify potential outliers.
+   - Box plots can reveal differences in data distribution between Azure and on-premise processes.
+   - Scatter plots can show relationships between variables, such as process duration and I/O operations.
+
+3. Correlation Analysis:
+   - Calculate correlation coefficients between different variables to identify potential relationships and dependencies.
+   - Focus on exploring correlations between performance-related variables and process characteristics.
+   - Use correlation matrices or heatmaps to visualize the correlations.
+
+4. Time Series Analysis:
+   - If the data includes timestamps, analyze the data as a time series to identify temporal patterns and trends.
+   - Plotting time series data can reveal seasonality, cyclical patterns, or sudden changes in performance.
+   - Calculate rolling averages or moving averages to smooth out noise and identify long-term trends.
+
+5. Outlier Detection:
+   - Identify and investigate any outliers or extreme values in the data.
+   - Outliers might indicate anomalous processes that are significantly impacting performance.
+   - Employ statistical techniques like z-scores, box plots, or clustering algorithms to detect outliers.
+
+6. Dimensionality Reduction:
+   - Consider using dimensionality reduction techniques like Principal Component Analysis (PCA) to reduce the complexity of the data and identify key factors contributing to performance differences.
+   - Visualize the reduced-dimensional data to gain insights into the separability of Azure and on-premise processes.
+
+It's important to note that the selection of specific EDA techniques should depend on the characteristics of the data and the goals of the analysis. The techniques mentioned above provide a starting point, but you can tailor the selection to best suit the dataset and the insights you want to uncover.
