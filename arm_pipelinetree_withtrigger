@@ -1,0 +1,78 @@
+import os
+import json
+from azure.common.credentials import ServicePrincipalCredentials
+from azure.mgmt.resource import ResourceManagementClient
+from azure.mgmt.datafactory import DataFactoryManagementClient
+
+# Set the credentials and subscription ID
+tenant_id = os.environ.get('AZURE_TENANT_ID')
+client_id = os.environ.get('AZURE_CLIENT_ID')
+client_secret = os.environ.get('AZURE_CLIENT_SECRET')
+subscription_id = os.environ.get('AZURE_SUBSCRIPTION_ID')
+
+# Set the resource group name and ADF instance name
+resource_group_name = 'my_resource_group'
+adf_name = 'my_adf_instance'
+
+# Set the paths to the old and new ARM templates
+old_template_path = 'old/arm_template.json'
+new_template_path = 'new/arm_template.json'
+
+# Set up the credentials and clients
+credentials = ServicePrincipalCredentials(client_id=client_id, secret=client_secret, tenant=tenant_id)
+resource_client = ResourceManagementClient(credentials, subscription_id)
+adf_client = DataFactoryManagementClient(credentials, subscription_id)
+
+# Get the list of objects in the ADF instance
+objects = adf_client.factories.list_objects(resource_group_name, adf_name)
+
+# Load the old and new ARM templates
+with open(old_template_path, 'r') as f:
+    old_template = json.load(f)
+
+with open(new_template_path, 'r') as f:
+    new_template = json.load(f)
+
+# Function to recursively find the top-level pipelines, datasets, linked services, and triggers
+def find_top_level_objects(object_name, dependencies, top_level_objects):
+    if object_name not in top_level_objects:
+        top_level_objects.append(object_name)
+        if object_name in deleted_objects:
+            for dependency_type, dependency_list in deleted_objects[object_name].items():
+                for dependency in dependency_list:
+                    find_top_level_objects(dependency, deleted_objects[object_name][dependency_type], top_level_objects)
+
+# Identify the objects that were deleted
+deleted_objects = {}
+for obj in objects:
+    obj_id = obj.id
+    obj_name = obj.name
+    obj_type = obj.type
+    if obj_type not in ['datasets', 'linkedServices', 'pipelines', 'triggers']:
+        continue
+    if obj_id not in new_template['resources']:
+        # Check if the deleted object has top-level dependencies
+        dependencies = adf_client.factories.get(resource_group_name, adf_name).properties.get(obj_type, [])
+        if dependencies:
+            # Retrieve the names of top-level dependent objects
+            top_level_dependencies = {dependency['referenceName']: {} for dependency in dependencies}
+            deleted_objects[obj_name] = {obj_type: top_level_dependencies}
+        else:
+            deleted_objects[obj_name] = {obj_type: {}}
+
+# Find all the top-level objects
+top_level_objects = []
+for deleted_object in deleted_objects:
+    for obj_type, dependencies in deleted_objects[deleted_object].items():
+        find_top_level_objects(deleted_object, dependencies, top_level_objects)
+
+# Function to recursively print the object tree
+def print_object_tree(object_name, dependencies, indent=0):
+    print(' ' * indent + '- ' + object_name)
+    for dependency_type, dependency_list in dependencies.items():
+        for dependency in dependency_list:
+            print_object_tree(dependency, dependencies[dependency_type], indent + 2)
+
+# Print the object tree for each top-level object
+for obj in top_level_objects:
+    print_object_tree(obj, deleted_objects[obj])
