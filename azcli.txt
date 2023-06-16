@@ -1,0 +1,6 @@
+az login --service-principal --username APP_ID --password CLIENT_SECRET --tenant TENANT_ID
+az account get-access-token --resource https://<your_vault_url> --query "accessToken" -o tsv
+curl --header "Authorization: Bearer ACCESS_TOKEN" \
+     --request GET \
+     --url "https://<your_vault_url>/v1/secret/data/<secret_path>" \
+     --insecure
